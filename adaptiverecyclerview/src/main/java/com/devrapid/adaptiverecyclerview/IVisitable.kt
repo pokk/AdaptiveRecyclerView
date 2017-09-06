@@ -1,4 +1,4 @@
-package no1.taiwan.devrapid.com.adaptiverecyclerview
+package com.devrapid.adaptiverecyclerview
 
 /**
  * An interface for visitors.

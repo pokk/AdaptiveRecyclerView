@@ -1,7 +1,7 @@
 package com.devrapid.example.model
 
+import com.devrapid.adaptiverecyclerview.IVisitable
 import com.devrapid.example.viewtype.MultiTypeFactory
-import no1.taiwan.devrapid.com.adaptiverecyclerview.IVisitable
 
 /**
  *

@@ -2,12 +2,12 @@ package com.devrapid.example.viewtype
 
 import android.support.v7.widget.RecyclerView.ViewHolder
 import android.view.View
+import com.devrapid.adaptiverecyclerview.ViewTypeFactory
 import com.devrapid.example.R
 import com.devrapid.example.model.Animal
 import com.devrapid.example.model.Person
 import com.devrapid.example.viewholder.FirstViewHolder
 import com.devrapid.example.viewholder.SecondViewHolder
-import no1.taiwan.devrapid.com.adaptiverecyclerview.ViewTypeFactory
 
 /**
  *

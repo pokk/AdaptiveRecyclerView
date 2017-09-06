@@ -1,10 +1,10 @@
 package com.devrapid.example.viewholder
 
 import android.view.View
+import com.devrapid.adaptiverecyclerview.AdaptiveAdapter
+import com.devrapid.adaptiverecyclerview.AdaptiveViewHolder
 import com.devrapid.example.model.Person
 import com.devrapid.example.viewtype.MultiTypeFactory
-import no1.taiwan.devrapid.com.adaptiverecyclerview.AdaptiveAdapter
-import no1.taiwan.devrapid.com.adaptiverecyclerview.AdaptiveViewHolder
 
 /**
  *
