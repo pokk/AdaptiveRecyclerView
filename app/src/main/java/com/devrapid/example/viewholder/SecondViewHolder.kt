@@ -12,7 +12,8 @@ import com.devrapid.example.viewtype.MultiTypeFactory
  * @author  jieyi
  * @since   9/6/17
  */
-class SecondViewHolder(view: View): AdaptiveViewHolder<MultiTypeFactory, Animal>(view) {
-    override fun initView(model: Animal, position: Int, adaptiveAdapter: AdaptiveAdapter<MultiTypeFactory, Animal>) {
+class SecondViewHolder(view: View): AdaptiveViewHolder<MultiTypeFactory, Animal, AdaptiveAdapter<MultiTypeFactory, Animal>>(
+    view) {
+    override fun initView(model: Animal, position: Int, adapter: AdaptiveAdapter<MultiTypeFactory, Animal>) {
     }
 }

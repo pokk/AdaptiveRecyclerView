@@ -10,7 +10,8 @@ import android.view.View
  * @author  jieyi
  * @since   9/6/17
  */
-abstract class AdaptiveViewHolder<VT: ViewTypeFactory, M: IVisitable<VT>>(view: View): RecyclerView.ViewHolder(view) {
+abstract class AdaptiveViewHolder<VT: ViewTypeFactory, M: IVisitable<VT>, in APT: AdaptiveAdapter<VT, M>>(view: View):
+    RecyclerView.ViewHolder(view) {
     protected val mContext: Context = view.context
 
     /**
@@ -18,7 +19,7 @@ abstract class AdaptiveViewHolder<VT: ViewTypeFactory, M: IVisitable<VT>>(view: 
      *
      * @param model     a data model after input from a list.
      * @param position  the index of a list.
-     * @param adaptiveAdapter   parent adaptiveAdapter.
+     * @param adapter   parent adapter.
      */
-    abstract fun initView(model: M, position: Int, adaptiveAdapter: AdaptiveAdapter<VT, M>)
+    abstract fun initView(model: M, position: Int, adapter: APT)
 }

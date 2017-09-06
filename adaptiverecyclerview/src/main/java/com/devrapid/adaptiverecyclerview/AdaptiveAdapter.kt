@@ -11,7 +11,7 @@ import android.view.ViewGroup
  * @since   9/6/17
  */
 abstract class AdaptiveAdapter<VT: ViewTypeFactory, M: IVisitable<VT>>(private var dataList: MutableList<M>):
-    RecyclerView.Adapter<AdaptiveViewHolder<VT, IVisitable<VT>>>() {
+    RecyclerView.Adapter<AdaptiveViewHolder<VT, IVisitable<VT>, AdaptiveAdapter<VT, IVisitable<VT>>>>() {
     protected abstract var typeFactory: VT
 
     //region Necessary override methods.
@@ -19,13 +19,16 @@ abstract class AdaptiveAdapter<VT: ViewTypeFactory, M: IVisitable<VT>>(private v
 
     override fun getItemViewType(position: Int): Int = this.dataList[position].type(this.typeFactory)
 
-    override fun onBindViewHolder(holder: AdaptiveViewHolder<VT, IVisitable<VT>>, position: Int) =
+    override fun onBindViewHolder(holder: AdaptiveViewHolder<VT, IVisitable<VT>, AdaptiveAdapter<VT, IVisitable<VT>>>,
+                                  position: Int) =
         holder.initView(this.dataList[position], position, this as AdaptiveAdapter<VT, IVisitable<VT>>)
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AdaptiveViewHolder<VT, IVisitable<VT>> {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int):
+        AdaptiveViewHolder<VT, IVisitable<VT>, AdaptiveAdapter<VT, IVisitable<VT>>> {
         val itemView: View = View.inflate(parent.context, this.typeFactory.getLayoutResource(viewType), null)
 
-        return this.typeFactory.createViewHolder(viewType, itemView) as AdaptiveViewHolder<VT, IVisitable<VT>>
+        return this.typeFactory.createViewHolder(viewType, itemView) as
+            AdaptiveViewHolder<VT, IVisitable<VT>, AdaptiveAdapter<VT, IVisitable<VT>>>
     }
     //endregion
 }
