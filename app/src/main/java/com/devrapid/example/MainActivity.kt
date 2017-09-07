@@ -20,7 +20,7 @@ class MainActivity: AppCompatActivity() {
                 Animal("COO")), true),
             Person("Apple", listOf(Animal("AEO"),
                 Animal("ATO"),
-                Animal("ADO"))),
+                Animal("ADO")), true),
             Person("Airbnb"),
             Person("Jieyi"))
 

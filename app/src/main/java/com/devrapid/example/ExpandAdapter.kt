@@ -26,10 +26,6 @@ class ExpandAdapter(override var dataList: MutableList<IExpandVisitor>):
         override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean = true
     }
 
-    override fun onBindViewHolder(holder: AdaptiveViewHolder<MultiTypeFactory, IExpandVisitor>, position: Int) {
-        holder.initView(this.dataList[position], position, this)
-    }
-
     fun expand(position: Int, newIndex: Int) {
         this.updateList {
             val subList = this.dataList[newIndex].let {

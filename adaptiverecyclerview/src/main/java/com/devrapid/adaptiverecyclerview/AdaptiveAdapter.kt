@@ -1,7 +1,6 @@
 package com.devrapid.adaptiverecyclerview
 
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 
@@ -20,13 +19,11 @@ abstract class AdaptiveAdapter<VT: ViewTypeFactory, M: IVisitable<VT>, VH: Recyc
     override fun getItemCount(): Int = this.dataList.size
 
     override fun getItemViewType(position: Int): Int {
-        Log.v("WTF", this.dataList[position].type(this.typeFactory).toString())
         return this.dataList[position].type(this.typeFactory)
     }
 
     override fun onBindViewHolder(holder: VH, position: Int) =
-        (holder as AdaptiveViewHolder<VT, M>).initView(this.dataList[position], position, this as VH)
-
+        (holder as AdaptiveViewHolder<VT, M>).initView(this.dataList[position], position, this)
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
         val itemView: View = View.inflate(parent.context, this.typeFactory.getLayoutResource(viewType), null)
 

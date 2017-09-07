@@ -6,6 +6,7 @@ import com.devrapid.example.ExpandAdapter
 import com.devrapid.example.IExpandVisitor
 import com.devrapid.example.model.Person
 import com.devrapid.example.viewtype.MultiTypeFactory
+import com.devrapid.kotlinknifer.logv
 import kotlinx.android.synthetic.main.item_first.view.btn
 import kotlinx.android.synthetic.main.item_first.view.tv_title
 
@@ -22,6 +23,7 @@ class FirstViewHolder(view: View): AdaptiveViewHolder<MultiTypeFactory, IExpandV
         this.itemView.tv_title.text = (model as Person).name
         this.itemView.btn.setOnClickListener {
             val newPosition = adapter.calculateIndex(position)
+            logv(newPosition)
             if (adapter.isCollapsed(newPosition)) {
                 adapter.expand(position, newPosition)
             }
