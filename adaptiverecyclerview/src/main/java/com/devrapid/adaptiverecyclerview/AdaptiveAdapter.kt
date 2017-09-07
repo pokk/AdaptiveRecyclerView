@@ -11,9 +11,10 @@ import android.view.ViewGroup
  * @author  jieyi
  * @since   9/6/17
  */
-abstract class AdaptiveAdapter<VT: ViewTypeFactory, M: IVisitable<VT>, VH: RecyclerView.ViewHolder>
-(private var dataList: MutableList<M>): RecyclerView.Adapter<VH>() {
+abstract class AdaptiveAdapter<VT: ViewTypeFactory, M: IVisitable<VT>, VH: RecyclerView.ViewHolder>:
+    RecyclerView.Adapter<VH>() {
     protected abstract var typeFactory: VT
+    protected abstract var dataList: MutableList<M>
 
     //region Necessary override methods.
     override fun getItemCount(): Int = this.dataList.size

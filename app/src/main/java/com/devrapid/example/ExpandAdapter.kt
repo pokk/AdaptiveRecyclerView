@@ -1,8 +1,6 @@
 package com.devrapid.example
 
 import android.support.v7.util.DiffUtil
-import android.view.View
-import android.view.ViewGroup
 import com.devrapid.adaptiverecyclerview.AdaptiveAdapter
 import com.devrapid.adaptiverecyclerview.AdaptiveViewHolder
 import com.devrapid.example.viewtype.MultiTypeFactory
@@ -11,8 +9,8 @@ import com.devrapid.example.viewtype.MultiTypeFactory
  * @author  jieyi
  * @since   9/7/17
  */
-class ExpandAdapter(private var dataList: MutableList<IExpandVisitor>):
-    AdaptiveAdapter<MultiTypeFactory, IExpandVisitor, AdaptiveViewHolder<MultiTypeFactory, IExpandVisitor>>(dataList) {
+class ExpandAdapter(override var dataList: MutableList<IExpandVisitor>):
+    AdaptiveAdapter<MultiTypeFactory, IExpandVisitor, AdaptiveViewHolder<MultiTypeFactory, IExpandVisitor>>() {
     override var typeFactory: MultiTypeFactory = MultiTypeFactory()
     private val originalParentPosition: MutableList<Int> = MutableList(this.dataList.size, { 0 })
 
@@ -28,22 +26,9 @@ class ExpandAdapter(private var dataList: MutableList<IExpandVisitor>):
         override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean = true
     }
 
-
-    override fun getItemViewType(position: Int): Int = this.dataList[position].type(this.typeFactory)
-
     override fun onBindViewHolder(holder: AdaptiveViewHolder<MultiTypeFactory, IExpandVisitor>, position: Int) {
-
         holder.initView(this.dataList[position], position, this)
     }
-
-    override fun onCreateViewHolder(parent: ViewGroup,
-                                    viewType: Int): AdaptiveViewHolder<MultiTypeFactory, IExpandVisitor> {
-        val itemView: View = View.inflate(parent.context, this.typeFactory.getLayoutResource(viewType), null)
-
-        return this.typeFactory.createViewHolder(viewType,
-            itemView) as AdaptiveViewHolder<MultiTypeFactory, IExpandVisitor>
-    }
-
 
     fun expand(position: Int, newIndex: Int) {
         this.updateList {
@@ -76,7 +61,6 @@ class ExpandAdapter(private var dataList: MutableList<IExpandVisitor>):
         val res = DiffUtil.calculateDiff(ExpandDiffUtil(this.dataList, newList), true)
         this.dataList = newList
         res.dispatchUpdatesTo(this)
-
     }
 
     private fun changeVisibleChildNumber(index: Int, size: Int) {
