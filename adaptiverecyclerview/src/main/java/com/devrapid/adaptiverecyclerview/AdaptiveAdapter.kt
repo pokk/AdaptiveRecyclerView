@@ -5,7 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 
 /**
- *
+ * An adaptive [RecyclerView] which accepts multiple type layout.
  *
  * @author  jieyi
  * @since   9/6/17
@@ -18,12 +18,11 @@ abstract class AdaptiveAdapter<VT: ViewTypeFactory, M: IVisitable<VT>, VH: Recyc
     //region Necessary override methods.
     override fun getItemCount(): Int = this.dataList.size
 
-    override fun getItemViewType(position: Int): Int {
-        return this.dataList[position].type(this.typeFactory)
-    }
+    override fun getItemViewType(position: Int): Int = this.dataList[position].type(this.typeFactory)
 
     override fun onBindViewHolder(holder: VH, position: Int) =
         (holder as AdaptiveViewHolder<VT, M>).initView(this.dataList[position], position, this)
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
         val itemView: View = View.inflate(parent.context, this.typeFactory.getLayoutResource(viewType), null)
 

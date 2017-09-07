@@ -1,6 +1,5 @@
 package com.devrapid.example.viewholder
 
-import android.util.Log
 import android.view.View
 import com.devrapid.adaptiverecyclerview.AdaptiveViewHolder
 import com.devrapid.example.ExpandAdapter
@@ -15,11 +14,9 @@ import kotlinx.android.synthetic.main.item_second.view.tv_subtitle
  * @author  jieyi
  * @since   9/6/17
  */
-class SecondViewHolder(view: View): AdaptiveViewHolder<MultiTypeFactory, IExpandVisitor>(
-    view) {
+class SecondViewHolder(view: View): AdaptiveViewHolder<MultiTypeFactory, IExpandVisitor>(view) {
     override fun initView(model: IExpandVisitor, position: Int, adapter: Any) {
         adapter as ExpandAdapter
-        Log.i("WTF", model.toString())
         this.itemView.tv_subtitle.text = (model as Animal).name
     }
 }

@@ -10,7 +10,7 @@ import android.view.View
  * @author  jieyi
  * @since   9/6/17
  */
-abstract class AdaptiveViewHolder<VT: ViewTypeFactory, M: IVisitable<VT>>(view: View):
+abstract class AdaptiveViewHolder<in VT: ViewTypeFactory, in M: IVisitable<VT>>(view: View):
     RecyclerView.ViewHolder(view) {
     protected val mContext: Context = view.context
 
