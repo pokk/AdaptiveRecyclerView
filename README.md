@@ -1,6 +1,6 @@
 # AdaptiveRecyclerView
 
-[![GitHub release](https://img.shields.io/github/release/qubyte/rubidium.svg)](https://github.com/pokk/AdaptiveRecyclerView)
+[![GitHub release](https://img.shields.io/github/release/pokk/AdaptiveRecyclerView.svg)](https://github.com/pokk/AdaptiveRecyclerView)
 
 In the beginning, my purpose is for the expanding recycler view. For it, I need to make recycler
 view adapt to each of the type of the list children. For this reason, first I open this adaptive
