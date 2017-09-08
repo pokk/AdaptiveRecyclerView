@@ -1,1 +1,1 @@
-include ':app', ':adaptiverecyclerview'
+include ':sample', ':adaptiverecyclerview'

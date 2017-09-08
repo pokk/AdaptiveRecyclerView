@@ -3,10 +3,7 @@
 /local.properties
 /.idea/workspace.xml
 /.idea/libraries
-.DS_Store
 /build
-/captures
-.externalNativeBuild
 .idea/gradle.xml
 .idea/markdown-navigator.xml
 .idea/markdown-navigator/
@@ -17,4 +14,4 @@
 gradle/
 gradlew
 gradlew.bat
-local.properties
+.idea/inspectionProfiles/
