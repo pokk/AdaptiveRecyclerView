@@ -10,8 +10,6 @@ import com.devrapid.example.viewholder.FirstViewHolder
 import com.devrapid.example.viewholder.SecondViewHolder
 
 /**
- *
- *
  * @author  jieyi
  * @since   9/6/17
  */

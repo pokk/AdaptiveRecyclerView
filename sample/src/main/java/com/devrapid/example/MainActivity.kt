@@ -25,7 +25,6 @@ class MainActivity: AppCompatActivity() {
             Person("Jieyi"))
 
         recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-//        recyclerView.layoutManager = WrapContentLinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         recyclerView.adapter = ExpandAdapter(itemList)
     }
 }

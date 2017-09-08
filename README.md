@@ -1,65 +1,104 @@
-# AdapativeRecyclerview
+# AdaptiveRecyclerView
 
-This library provides a rotated circle music player view. You could customize the vary variables by yourself.
+In the beginning, my purpose is for the expanding recycler view. For it, I need to make recycler
+view adapt to each of the type of the list children. For this reason, first I open this adaptive
+recycler view.
 
-Let's see the result is faster than I explain. :)
+This adaptive recycler view might be not the easiest way to achieve. I'm using the concept of [Visitor
+Pattern](http://www.wikiwand.com/en/Visitor_pattern) into this adaptive recycler view. Here there're
+some roles I have to introduce first.
 
-# Demo
+- **_Visitor_**: `AdaptiveAdapter`
+- **_Visitable (Element)_**: `IVisitable`
 
-<img src="https://github.com/pokk/MusicDiskPlayer/raw/master/gif/music_disk_player.gif" width="300" height="300" />
+We use them to get each of the type of the elements.
 
 # How to use
 
-The simplest way is as below:
+#### First create concrete class
 
-```xml
-<com.devrapid.musicdiskplayer.RotatedCircleWithIconImageView
-    android:id="@+id/rotatedCircleImageView"
-    android:layout_width="200dp"
-    android:layout_height="200dp"
-    app:src="@drawable/sample_lady_gaga"/>
+1. **RecyclerView.Adaptor**
+2. **ViewHolder**
+3. **Data Model Elements**
+4. **ViewTypeFactory**
+
+#### Example
+
+Make two type of the element class.
+
+```kotlin
+data class ProductTypeOne(var name: String,
+                          override var childItemList: List<IExpandVisitor> = emptyList(),
+                          override var isExpandable: Boolean = false): IVisitable {
+    override fun type(typeFactory: MultiTypeFactory): Int = typeFactory.type(this)
+}
+
+data class ProductTypeTwo(var name: String,
+                          override var childItemList: List<IExpandVisitor> = emptyList(),
+                          override var isExpandable: Boolean = false): IVisitable {
+    override fun type(typeFactory: MultiTypeFactory): Int = typeFactory.type(this)
+}
 ```
 
-The img source is a necessary parameter; otherwise, it won't work.
+Create a multiple view type factory for providing difference view type and view holder.
 
-The parameters of this player view are allowed to control as below:
+```kotlin
+class MultiTypeFactory: ViewTypeFactory() {
+ override var transformMap: MutableMap<Int, Pair<Int, (View) -> ViewHolder>> =
+     mutableMapOf(1 to Pair(R.layout.item_first, { itemView -> FirstViewHolder(itemView) }),
+         2 to Pair(R.layout.item_second, { itemView -> SecondViewHolder(itemView) }))
 
-```xml
-<com.devrapid.musicdiskplayer.RotatedCircleWithIconImageView
-    android:id="@+id/rotatedCircleImageView"
-    android:layout_width="200dp"
-    android:layout_height="200dp"
-    app:src="@drawable/sample_lady_gaga"
-    app:progress_color="#2D3BFF"
-    app:unprogress_color="#AFE2FF"
-    app:progress_width="15"
-    app:progress="40"
-    app:controller_radius="20"
-    app:controller_color="#9F9F9F"
-    app:unpress_controller_color="#FFFFFF"
-    app:end_time="120"
-    app:fore_icon="@drawable/play_icon"
-    app:running_icon="@drawable/pause_icon"
-    app:time_label="true"/>
+ fun type(typeone: ProductTypeOne): Int = 1
+
+ fun type(typetwo: ProductTypeTwo): Int = 2
+}
 ```
 
-#### The description of the variables.
+Depend on the difference layouts, we init in each of view holder. The view holder is like an
+`activity`/`fragment`. I prefer to initial and control the components in the view holder.
 
-- **_progress_width_**: the width of the progress bar.
-- **_progress_**: current progress percent. The range is between `0 ~ 100`.
-- **_controller_radius_**: the radius of the progress controller.
-- **_end_time_**: due to `progress` is according to `end time`, this should be set together with `progress`. Unit is `Second`.
-- **_fore_icon_**: the icon will appear when the player is `stop` state.
-- **_running_icon_**: the icon will appear when the player is `running` state.
-- **_time_label_**: `true` → show the time label; `false` → hide the time label.
+```kotlin
+class TypeOneViewHolder(view: View): AdaptiveViewHolder<MultiTypeFactory, ProductTypeOne>(view) {
+    override fun initView(model: ProductTypeOne, position: Int, adapter: Any) {
+        adapter as YouAdapterClassName
+    }
+}
 
-This is also allowed change by programming! 😄
+class TypeTwoViewHolder(view: View): AdaptiveViewHolder<MultiTypeFactory, ProductTypeTwo>(view) {
+    override fun initView(model: ProductTypeTwo, position: Int, adapter: Any) {
+        adapter as YouAdapterClassName
+    }
+}
+```
+
+As like original using, it's so easy!
+
+```kotlin
+class MainActivity: AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        ...
+        val itemList: MutableList<IVisitable> =
+            mutableListOf(ProductTypeTwo("iPhone 6 plus"),
+                ProductTypeOne("Google"),
+                ProductTypeOne("HTC"),
+                ProductTypeTwo("iPhone 6"),
+                ProductTypeTwo("iPhone 6s"),
+                ProductTypeTwo("iPhone 7"),
+                ProductTypeTwo("iPhone 6s"),
+                ProductTypeOne("Mi"),
+                ProductTypeOne("Facebook"))
+
+        recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        recyclerView.adapter = AdaptiveAdapter(itemList)
+    }
+}
+```
 
 # Using MusicDiskPlayer
 
 ## Gradle
 
-It's easy to import it, you just put them into your gradle file.
+It's very easy to import, you just put them into your gradle file.
 
 ```gradle
 compile 'com.devrapid.jieyi:adaptiverecyclerview:0.0.6'
@@ -78,6 +117,8 @@ compile 'com.devrapid.jieyi:adaptiverecyclerview:0.0.6'
 
 # Feature
 
+- [ ] Reduce the inherit classes.
+- [ ] The `adapter` parameter in the `AdaptiveViewHolder` to specific data type.
 
 # License
 
