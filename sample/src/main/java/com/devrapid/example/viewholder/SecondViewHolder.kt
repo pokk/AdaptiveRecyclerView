@@ -8,8 +8,6 @@ import com.devrapid.example.viewtype.MultiTypeFactory
 import kotlinx.android.synthetic.main.item_second.view.tv_subtitle
 
 /**
- *
- *
  * @author  jieyi
  * @since   9/6/17
  */

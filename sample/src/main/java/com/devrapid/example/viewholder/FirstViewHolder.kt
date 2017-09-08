@@ -9,8 +9,6 @@ import kotlinx.android.synthetic.main.item_first.view.btn
 import kotlinx.android.synthetic.main.item_first.view.tv_title
 
 /**
- *
- *
  * @author  jieyi
  * @since   9/6/17
  */

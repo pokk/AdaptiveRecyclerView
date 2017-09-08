@@ -22,7 +22,7 @@ We use them to get each of the type of the elements.
 3. **Data Model Elements**
 4. **ViewTypeFactory**
 
-#### Example
+#### 🍷 Example
 
 Make two type of the element class.
 
@@ -94,6 +94,9 @@ class MainActivity: AppCompatActivity() {
 }
 ```
 
+If you'd like to know more detail or how to implement the expanding recycler view, check the sample project
+please. There is a simple sample for this library. 😄
+
 # Using MusicDiskPlayer
 
 ## Gradle
@@ -119,6 +122,9 @@ compile 'com.devrapid.jieyi:adaptiverecyclerview:0.0.6'
 
 - [ ] Reduce the inherit classes.
 - [ ] The `adapter` parameter in the `AdaptiveViewHolder` to specific data type.
+
+If you have any idea about making this library better, please give me an issue.
+Thank you very much!
 
 # License
 
