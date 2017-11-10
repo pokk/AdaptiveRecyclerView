@@ -100,8 +100,6 @@ class MainActivity: AppCompatActivity() {
 If you'd like to know more detail or how to implement the expanding recycler view, check the sample project
 please. There is a simple sample for this library. 😄
 
-# Using MusicDiskPlayer
-
 ## Gradle
 
 It's very easy to import, you just put them into your gradle file.
