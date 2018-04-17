@@ -105,7 +105,7 @@ please. There is a simple sample for this library. 😄
 It's very easy to import, you just put them into your gradle file.
 
 ```gradle
-compile 'com.devrapid.jieyi:adaptiverecyclerview:0.0.6'
+compile "com.devrapid.jieyi:adaptiverecyclerview:0.0.7"
 ```
 
 ## Maven
@@ -114,7 +114,7 @@ compile 'com.devrapid.jieyi:adaptiverecyclerview:0.0.6'
 <dependency>
   <groupId>com.devrapid.jieyi</groupId>
   <artifactId>adaptiverecyclerview</artifactId>
-  <version>0.0.6</version>
+  <version>0.0.7</version>
   <type>pom</type>
 </dependency>
 ```
