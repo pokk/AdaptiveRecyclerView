@@ -12,6 +12,28 @@ import android.view.ViewGroup
  */
 abstract class AdaptiveAdapter<VT: ViewTypeFactory, M: IVisitable<VT>, VH: RecyclerView.ViewHolder>:
     RecyclerView.Adapter<VH>() {
+    var headerEntity: M? = null
+        set(value) {
+            value?.let {
+                field = it
+                dataList.add(0, it)
+                notifyItemInserted(0)
+            } ?: run {
+                dataList.removeAt(0)
+                notifyItemRemoved(0)
+            }
+        }
+    var footerEntity: M? = null
+        set(value) {
+            value?.let {
+                field = it
+                dataList.add(dataList.size, it)
+                notifyItemChanged(dataList.size)
+            } ?: run {
+                dataList.removeAt(dataList.size)
+                notifyItemChanged(dataList.size)
+            }
+        }
     protected abstract var typeFactory: VT
     protected abstract var dataList: MutableList<M>
 
