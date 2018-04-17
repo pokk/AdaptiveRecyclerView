@@ -10,7 +10,7 @@ import android.view.ViewGroup
  * @author  jieyi
  * @since   9/6/17
  */
-abstract class AdaptiveAdapter<VT: ViewTypeFactory, M: IVisitable<VT>, VH: RecyclerView.ViewHolder>:
+abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : RecyclerView.ViewHolder> :
     RecyclerView.Adapter<VH>() {
     var headerEntity: M? = null
         set(value) {
@@ -51,4 +51,21 @@ abstract class AdaptiveAdapter<VT: ViewTypeFactory, M: IVisitable<VT>, VH: Recyc
         return this.typeFactory.createViewHolder(viewType, itemView) as VH
     }
     //endregion
+
+    fun appendList(list: MutableList<M>) {
+        val startIndex = dataList.size
+
+        dataList.addAll(startIndex, list)
+        notifyItemRangeChanged(startIndex, list.size)
+    }
+
+    fun dropList(startIndex: Int, endIndex: Int) {
+        when {
+            startIndex < 0 || endIndex >= dataList.size -> throw IndexOutOfBoundsException("The range is over than list.")
+            startIndex > endIndex -> throw IndexOutOfBoundsException("startIndex index must be less than endIndex index.")
+        }
+
+        repeat(endIndex - startIndex + 1) { dataList.removeAt(startIndex) }
+        notifyDataSetChanged()
+    }
 }
