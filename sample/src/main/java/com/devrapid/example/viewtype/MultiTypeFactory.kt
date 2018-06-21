@@ -1,7 +1,7 @@
 package com.devrapid.example.viewtype
 
-import android.support.v7.widget.RecyclerView.ViewHolder
 import android.view.View
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.devrapid.adaptiverecyclerview.ViewTypeFactory
 import com.devrapid.example.R
 import com.devrapid.example.model.Animal

@@ -1,8 +1,8 @@
 package com.devrapid.adaptiverecyclerview
 
 import android.content.Context
-import android.support.v7.widget.RecyclerView
 import android.view.View
+import androidx.recyclerview.widget.RecyclerView
 
 /**
  * An abstract view holder.
@@ -10,7 +10,7 @@ import android.view.View
  * @author  jieyi
  * @since   9/6/17
  */
-abstract class AdaptiveViewHolder<in VT: ViewTypeFactory, in M: IVisitable<VT>>(view: View):
+abstract class AdaptiveViewHolder<in VT : ViewTypeFactory, in M : IVisitable<VT>>(view: View) :
     RecyclerView.ViewHolder(view) {
     protected val mContext: Context = view.context
 

@@ -1,9 +1,9 @@
 package com.devrapid.adaptiverecyclerview
 
-import android.support.annotation.LayoutRes
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.RecyclerView.ViewHolder
 import android.view.View
+import androidx.annotation.LayoutRes
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 
 /**
  * A base interface of the multi-view type.
@@ -22,7 +22,7 @@ abstract class ViewTypeFactory {
      * @param itemView  a view after inflating.
      * @return          [RecyclerView.ViewHolder] of recycler view holder.
      */
-    fun createViewHolder(type: Int, itemView: View): RecyclerView.ViewHolder =
+    fun createViewHolder(type: Int, itemView: View): androidx.recyclerview.widget.RecyclerView.ViewHolder =
         this.transformMap[type]?.second?.invoke(itemView) ?: error("You don't set the viewholder function.")
 
     /**

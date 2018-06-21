@@ -1,6 +1,6 @@
 package com.devrapid.example
 
-import android.support.v7.util.DiffUtil
+import androidx.recyclerview.widget.DiffUtil
 import com.devrapid.adaptiverecyclerview.AdaptiveAdapter
 import com.devrapid.adaptiverecyclerview.AdaptiveViewHolder
 import com.devrapid.example.viewtype.MultiTypeFactory
