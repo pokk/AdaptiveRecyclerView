@@ -1,5 +1,6 @@
 package com.devrapid.adaptiverecyclerview
 
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -46,7 +47,8 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
         (holder as AdaptiveViewHolder<VT, M>).initView(this.dataList[position], position, this)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-        val itemView: View = View.inflate(parent.context, this.typeFactory.getLayoutResource(viewType), null)
+        val itemView: View =
+            LayoutInflater.from(parent.context).inflate(this.typeFactory.getLayoutResource(viewType), parent, false)
 
         return this.typeFactory.createViewHolder(viewType, itemView) as VH
     }
@@ -68,4 +70,6 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
         repeat(endIndex - startIndex + 1) { dataList.removeAt(startIndex) }
         notifyDataSetChanged()
     }
+
+    fun clearList() = dropList(0, dataList.size - 1)
 }
