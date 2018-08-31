@@ -3,6 +3,7 @@ package com.devrapid.adaptiverecyclerview
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 
 /**
@@ -35,41 +36,70 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
                 notifyItemChanged(dataList.size)
             }
         }
+    open var diffUtil: AdaptiveDiffUtil<VT, M> = MultiDiffUtil()
+
     protected abstract var typeFactory: VT
     protected abstract var dataList: MutableList<M>
 
-    //region Necessary override methods.
-    override fun getItemCount(): Int = this.dataList.size
+    inner class MultiDiffUtil : AdaptiveDiffUtil<VT, M>() {
+        override var oldList = mutableListOf<M>()
+        override var newList = mutableListOf<M>()
 
-    override fun getItemViewType(position: Int): Int = this.dataList[position].type(this.typeFactory)
+        override fun getOldListSize() = oldList.size
+
+        override fun getNewListSize() = newList.size
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) =
+            oldList[oldItemPosition].hashCode() == newList[newItemPosition].hashCode()
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) = true
+    }
+
+    //region Necessary override methods.
+    override fun getItemCount(): Int = dataList.size
+
+    override fun getItemViewType(position: Int): Int = dataList[position].type(typeFactory)
 
     override fun onBindViewHolder(holder: VH, position: Int) =
-        (holder as AdaptiveViewHolder<VT, M>).initView(this.dataList[position], position, this)
+        (holder as AdaptiveViewHolder<VT, M>).initView(dataList[position], position, this)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
         val itemView: View =
-            LayoutInflater.from(parent.context).inflate(this.typeFactory.getLayoutResource(viewType), parent, false)
+            LayoutInflater.from(parent.context).inflate(typeFactory.getLayoutResource(viewType), parent, false)
 
-        return this.typeFactory.createViewHolder(viewType, itemView) as VH
+        return typeFactory.createViewHolder(viewType, itemView) as VH
     }
     //endregion
 
-    fun appendList(list: MutableList<M>) {
+    open fun appendList(list: MutableList<M>) {
         val startIndex = dataList.size
-
-        dataList.addAll(startIndex, list)
-        notifyItemRangeChanged(startIndex, list.size)
+        val newList = dataList.toMutableList().apply { addAll(startIndex, list) }
+//        notifyItemRangeChanged(startIndex, list.size)
+        updateList { newList }
     }
 
-    fun dropList(startIndex: Int, endIndex: Int) {
+    open fun dropList(startIndex: Int, endIndex: Int) {
         when {
             startIndex < 0 || endIndex >= dataList.size -> throw IndexOutOfBoundsException("The range is over than list.")
             startIndex > endIndex -> throw IndexOutOfBoundsException("startIndex index must be less than endIndex index.")
         }
+        val newList = dataList.toMutableList()
 
-        repeat(endIndex - startIndex + 1) { dataList.removeAt(startIndex) }
-        notifyDataSetChanged()
+        repeat(endIndex - startIndex + 1) { newList.removeAt(startIndex) }
+//        notifyDataSetChanged()
+        updateList { newList }
     }
 
-    fun clearList() = dropList(0, dataList.size - 1)
+    open fun clearList() = dropList(0, dataList.size - 1)
+
+    private fun updateList(getNewListBlock: () -> MutableList<M>) {
+        val newList = getNewListBlock()
+        val res = DiffUtil.calculateDiff(diffUtil.apply {
+            oldList = dataList
+            this.newList = newList
+        }, true)
+
+        dataList = newList
+        res.dispatchUpdatesTo(this)
+    }
 }

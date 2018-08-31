@@ -5,28 +5,42 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.devrapid.example.model.Animal
 import com.devrapid.example.model.Person
+import kotlinx.android.synthetic.main.activity_main.btn_add
+import kotlinx.android.synthetic.main.activity_main.btn_minus
+import kotlinx.android.synthetic.main.activity_main.recyclerView
 
-class MainActivity: AppCompatActivity() {
+class MainActivity : AppCompatActivity() {
+    var a = 1
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         val itemList: MutableList<IExpandVisitor> = mutableListOf(Person("Google"),
-            Person("Facebook", listOf(Animal("CEO"),
-                Animal("CTO"),
-                Animal("CDO"),
-                Animal("CAO"),
-                Animal("COO")), true),
-            Person("Apple", listOf(Animal("AEO"),
-                Animal("ATO"),
-                Animal("ADO")), true),
-            Person("Airbnb"),
-            Person("Jieyi"))
+                                                                  Person("Facebook", listOf(Animal("CEO"),
+                                                                                            Animal("CTO"),
+                                                                                            Animal("CDO"),
+                                                                                            Animal("CAO"),
+                                                                                            Animal("COO")), true),
+                                                                  Person("Apple", listOf(Animal("AEO"),
+                                                                                         Animal("ATO"),
+                                                                                         Animal("ADO")), true),
+                                                                  Person("Airbnb"),
+                                                                  Person("Jieyi"))
 
-        recyclerView.layoutManager =
-            androidx.recyclerview.widget.LinearLayoutManager(this,
-                                                             androidx.recyclerview.widget.LinearLayoutManager.VERTICAL,
-                                                             false)
-        recyclerView.adapter = ExpandAdapter(itemList)
+        val adapter = ExpandAdapter(itemList)
+        recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        recyclerView.adapter = adapter
+
+        btn_add.setOnClickListener {
+            adapter.appendList(listOf(Person("Google $a")) as MutableList<IExpandVisitor>)
+            a++
+        }
+        btn_minus.setOnClickListener {
+            adapter.dropList(1, 1)
+        }
+        btn_minus.setOnLongClickListener {
+            adapter.clearList()
+            true
+        }
     }
 }
