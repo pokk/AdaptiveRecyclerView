@@ -37,6 +37,7 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
             }
         }
     open var diffUtil: AdaptiveDiffUtil<VT, M> = MultiDiffUtil()
+    open var useDiffUtilUpdate = true
 
     protected abstract var typeFactory: VT
     protected abstract var dataList: MutableList<M>
@@ -74,7 +75,11 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
     open fun appendList(list: MutableList<M>) {
         val startIndex = dataList.size
         val newList = dataList.toMutableList().apply { addAll(startIndex, list) }
-//        notifyItemRangeChanged(startIndex, list.size)
+        updateList { newList }
+    }
+
+    open fun append(item: M) {
+        val newList = dataList.toMutableList().apply { add(item) }
         updateList { newList }
     }
 
@@ -86,9 +91,10 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
         val newList = dataList.toMutableList()
 
         repeat(endIndex - startIndex + 1) { newList.removeAt(startIndex) }
-//        notifyDataSetChanged()
         updateList { newList }
     }
+
+    open fun dropAt(index: Int) = dropList(index, index)
 
     open fun clearList() = dropList(0, dataList.size - 1)
 
@@ -97,9 +103,12 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
         val res = DiffUtil.calculateDiff(diffUtil.apply {
             oldList = dataList
             this.newList = newList
-        }, true)
+        })
 
         dataList = newList
-        res.dispatchUpdatesTo(this)
+        if (useDiffUtilUpdate)
+            res.dispatchUpdatesTo(this)
+        else
+            notifyDataSetChanged()
     }
 }

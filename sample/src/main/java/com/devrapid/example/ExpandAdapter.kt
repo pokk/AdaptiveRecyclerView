@@ -12,7 +12,8 @@ import com.devrapid.example.viewtype.MultiTypeFactory
 class ExpandAdapter(override var dataList: MutableList<IExpandVisitor>):
     AdaptiveAdapter<MultiTypeFactory, IExpandVisitor, AdaptiveViewHolder<MultiTypeFactory, IExpandVisitor>>() {
     override var typeFactory: MultiTypeFactory = MultiTypeFactory()
-    private val originalParentPosition: MutableList<Int> = MutableList(this.dataList.size, { 0 })
+    //    override var useDiffUtilUpdate = false
+    private val originalParentPosition: MutableList<Int> = MutableList(this.dataList.size) { 0 }
 
     class ExpandDiffUtil(private var oldList: MutableList<IExpandVisitor>,
                          private var newList: MutableList<IExpandVisitor>): DiffUtil.Callback() {
