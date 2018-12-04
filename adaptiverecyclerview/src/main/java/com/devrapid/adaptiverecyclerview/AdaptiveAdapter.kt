@@ -72,6 +72,7 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
     }
     //endregion
 
+    // OPTIMIZE(jieyi): 2018/12/04 There's no checking bounding.
     open fun appendList(list: MutableList<M>) {
         val startIndex = dataList.size
         val newList = dataList.toMutableList().apply { addAll(startIndex, list) }
@@ -80,6 +81,26 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
 
     open fun append(item: M) {
         val newList = dataList.toMutableList().apply { add(item) }
+        updateList { newList }
+    }
+
+    open fun add(position: Int, item: M) {
+        var size = dataList.size
+        if (headerEntity != null) size--
+        if (footerEntity != null) size--
+
+        if (size <= 0) throw IndexOutOfBoundsException()
+
+        val newList = dataList.toMutableList().apply {
+            add(position + (if (headerEntity == null) 0 else 1), item)
+        }
+        updateList { newList }
+    }
+
+    open fun add(position: Int, list: MutableList<M>) {
+        val newList = dataList.toMutableList().apply {
+            addAll(position + (if (headerEntity == null) 0 else 1), list)
+        }
         updateList { newList }
     }
 
