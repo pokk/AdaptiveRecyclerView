@@ -105,7 +105,7 @@ please. There is a simple sample for this library. 😄
 It's very easy to import, you just put them into your gradle file.
 
 ```gradle
-compile "com.devrapid.jieyi:adaptiverecyclerview:1.0.4"
+compile "com.devrapid.jieyi:adaptiverecyclerview:1.0.5"
 ```
 
 ## Maven
@@ -114,14 +114,14 @@ compile "com.devrapid.jieyi:adaptiverecyclerview:1.0.4"
 <dependency>
   <groupId>com.devrapid.jieyi</groupId>
   <artifactId>adaptiverecyclerview</artifactId>
-  <version>1.0.4</version>
+  <version>1.0.5</version>
   <type>pom</type>
 </dependency>
 ```
 
 # Feature
 
-- [ ] Reduce the inherit classes.
+- [ ] Reduce the inherit classe.
 - [ ] The `adapter` parameter in the `AdaptiveViewHolder` to specific data type.
 
 If you have any idea about making this library better, please give me an issue.
