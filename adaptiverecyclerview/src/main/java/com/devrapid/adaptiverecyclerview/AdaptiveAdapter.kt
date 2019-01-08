@@ -3,8 +3,6 @@ package com.devrapid.adaptiverecyclerview
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.RecyclerView
 
 /**
  * An adaptive [RecyclerView] which accepts multiple type layout.
@@ -68,7 +66,7 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
         val itemView: View =
             LayoutInflater.from(parent.context).inflate(typeFactory.getLayoutResource(viewType), parent, false)
 
-        return typeFactory.createViewHolder(viewType, itemView) as VH
+        return typeFactory.createViewHolder(viewType, itemView)
     }
     //endregion
 
@@ -117,7 +115,21 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
 
     open fun dropAt(index: Int) = dropList(index, index)
 
-    open fun clearList() = dropList(0, dataList.size - 1)
+    open fun clearList(header: Boolean = true, footer: Boolean = true): Boolean {
+        var from = 0
+        var to = dataList.size - 1
+
+        if (dataList.size <= 0)
+            return false
+        if (!header && headerEntity != null)
+            from++
+        if (!footer && headerEntity != null)
+            to--
+
+        dropList(from, to)
+
+        return true
+    }
 
     private fun updateList(getNewListBlock: () -> MutableList<M>) {
         val newList = getNewListBlock()
