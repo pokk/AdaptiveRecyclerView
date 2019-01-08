@@ -3,6 +3,8 @@ package com.devrapid.adaptiverecyclerview
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
 
 /**
  * An adaptive [RecyclerView] which accepts multiple type layout.
@@ -66,7 +68,7 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
         val itemView: View =
             LayoutInflater.from(parent.context).inflate(typeFactory.getLayoutResource(viewType), parent, false)
 
-        return typeFactory.createViewHolder(viewType, itemView)
+        return typeFactory.createViewHolder(viewType, itemView) as VH
     }
     //endregion
 

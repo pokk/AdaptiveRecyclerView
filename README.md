@@ -48,8 +48,8 @@ Create a multiple view type factory for providing difference view type and view 
 ```kotlin
 class MultiTypeFactory: ViewTypeFactory() {
  override var transformMap: MutableMap<Int, Pair<Int, (View) -> ViewHolder>> =
-     mutableMapOf(1 to Pair(R.layout.item_first, { itemView -> FirstViewHolder(itemView) }),
-         2 to Pair(R.layout.item_second, { itemView -> SecondViewHolder(itemView) }))
+     mutableMapOf(1 to Pair(R.layout.item_first ) { itemView -> FirstViewHolder(itemView) },
+         2 to Pair(R.layout.item_second ) { itemView -> SecondViewHolder(itemView) })
 
  fun type(typeone: ProductTypeOne): Int = 1
 
@@ -105,7 +105,7 @@ please. There is a simple sample for this library. 😄
 It's very easy to import, you just put them into your gradle file.
 
 ```gradle
-compile "com.devrapid.jieyi:adaptiverecyclerview:1.0.5"
+compile "com.devrapid.jieyi:adaptiverecyclerview:1.0.6"
 ```
 
 ## Maven
