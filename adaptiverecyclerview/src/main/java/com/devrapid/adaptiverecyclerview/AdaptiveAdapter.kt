@@ -57,9 +57,9 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
     }
 
     //region Necessary override methods.
-    override fun getItemCount(): Int = dataList.size
+    override fun getItemCount() = dataList.size
 
-    override fun getItemViewType(position: Int): Int = dataList[position].type(typeFactory)
+    override fun getItemViewType(position: Int) = dataList[position].type(typeFactory)
 
     override fun onBindViewHolder(holder: VH, position: Int) =
         (holder as AdaptiveViewHolder<VT, M>).initView(dataList[position], position, this)
@@ -71,6 +71,8 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
         return typeFactory.createViewHolder(viewType, itemView) as VH
     }
     //endregion
+
+    fun listDescription() = dataList.joinToString("\n") { it.toString() }
 
     // OPTIMIZE(jieyi): 2018/12/04 There's no checking bounding.
     open fun appendList(list: MutableList<M>) {
@@ -131,6 +133,10 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
         dropList(from, to)
 
         return true
+    }
+
+    open fun replaceWholeList(newList: MutableList<M>) {
+        updateList { newList }
     }
 
     private fun updateList(getNewListBlock: () -> MutableList<M>) {

@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 abstract class AdaptiveViewHolder<in VT : ViewTypeFactory, in M : IVisitable<VT>>(
     view: View
 ) : RecyclerView.ViewHolder(view) {
-    protected val mContext: Context = view.context
+    protected val mContext: Context = itemView.context
 
     /**
      * Set the views' properties.
@@ -22,5 +22,5 @@ abstract class AdaptiveViewHolder<in VT : ViewTypeFactory, in M : IVisitable<VT>
      * @param position  the index of a list.
      * @param adapter   parent adapter.
      */
-    abstract fun initView(model: M, position: Int, adapter: Any)
+    abstract fun initView(model: M, position: Int, adapter: AdaptiveAdapter<*, *, *>)
 }
