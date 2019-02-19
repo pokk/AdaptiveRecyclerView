@@ -17,24 +17,42 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
     var headerEntity: M? = null
         set(value) {
             value?.let {
-                field = it
-                dataList.add(0, it)
-                notifyItemInserted(0)
+                if (field == null) {
+                    dataList.add(0, it)
+                    notifyItemInserted(0)
+                }
+                else {
+                    dataList.removeAt(0)
+                    dataList.add(0, it)
+                    notifyItemChanged(0)
+                }
             } ?: run {
-                dataList.removeAt(0)
-                notifyItemRemoved(0)
+                if (field != null) {
+                    dataList.removeAt(0)
+                    notifyItemRemoved(0)
+                }
             }
+            field = value
         }
     var footerEntity: M? = null
         set(value) {
             value?.let {
-                field = it
-                dataList.add(dataList.size, it)
-                notifyItemChanged(dataList.size)
+                if (field == null) {
+                    dataList.add(dataList.size, it)
+                    notifyItemInserted(dataList.size)
+                }
+                else {
+                    dataList.removeAt(dataList.size - 1)
+                    dataList.add(dataList.size, it)
+                    notifyItemChanged(dataList.size - 1)
+                }
             } ?: run {
-                dataList.removeAt(dataList.size)
-                notifyItemChanged(dataList.size)
+                if (field != null) {
+                    dataList.removeAt(dataList.size - 1)
+                    notifyItemRemoved(dataList.size)
+                }
             }
+            field = value
         }
     open var diffUtil: AdaptiveDiffUtil<VT, M> = MultiDiffUtil()
     open var useDiffUtilUpdate = true
@@ -76,16 +94,22 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
 
     // OPTIMIZE(jieyi): 2018/12/04 There's no checking bounding.
     open fun appendList(list: MutableList<M>) {
-        val startIndex = dataList.size
+        var startIndex = dataList.size
+        if (footerEntity != null)
+            startIndex--
+        // [toMutableList()] will create a new [ArrayList].
         val newList = dataList.toMutableList().apply { addAll(startIndex, list) }
         updateList { newList }
     }
 
     open fun append(item: M) {
-        val newList = dataList.toMutableList().apply { add(item) }
+        val newList = dataList.toMutableList().apply {
+            if (footerEntity != null) add(dataList.size - 1, item) else add(item)
+        }
         updateList { newList }
     }
 
+    @Deprecated("There's some bugs with index of header and footer")
     open fun add(position: Int, item: M) {
         var size = dataList.size
         if (headerEntity != null) size--
@@ -94,18 +118,20 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
         if (size <= 0) throw IndexOutOfBoundsException()
 
         val newList = dataList.toMutableList().apply {
-            add(position + (if (headerEntity == null) 0 else 1), item)
+            add(position + (if (headerEntity == null) 0 else 1) + (if (footerEntity == null) 0 else -1), item)
         }
         updateList { newList }
     }
 
+    @Deprecated("There's some bugs with index of header and footer")
     open fun add(position: Int, list: MutableList<M>) {
         val newList = dataList.toMutableList().apply {
-            addAll(position + (if (headerEntity == null) 0 else 1), list)
+            addAll(position + (if (headerEntity == null) 0 else 1) + (if (footerEntity == null) 0 else -1), list)
         }
         updateList { newList }
     }
 
+    @Deprecated("There's some bugs with index of header and footer")
     open fun dropList(startIndex: Int, endIndex: Int) {
         when {
             startIndex < 0 || endIndex >= dataList.size -> throw IndexOutOfBoundsException("The range is over than list.")
@@ -117,7 +143,10 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
         updateList { newList }
     }
 
-    open fun dropAt(index: Int) = dropList(index, index)
+    @Deprecated("There's some bugs with index of header and footer")
+    open fun dropAt(index: Int) {
+        dropList(index, index)
+    }
 
     open fun clearList(header: Boolean = true, footer: Boolean = true): Boolean {
         var from = 0
@@ -129,6 +158,8 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
             from++
         if (!footer && headerEntity != null)
             to--
+        if (header) headerEntity = null
+        if (footer) footerEntity = null
 
         dropList(from, to)
 
@@ -137,6 +168,8 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
 
     open fun replaceWholeList(newList: MutableList<M>) {
         updateList { newList }
+        headerEntity = null
+        footerEntity = null
     }
 
     private fun updateList(getNewListBlock: () -> MutableList<M>) {

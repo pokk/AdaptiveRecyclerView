@@ -9,20 +9,23 @@ import com.devrapid.example.viewtype.MultiTypeFactory
  * @author  jieyi
  * @since   9/7/17
  */
-class ExpandAdapter(override var dataList: MutableList<IExpandVisitor>):
+class ExpandAdapter(override var dataList: MutableList<IExpandVisitor>) :
     AdaptiveAdapter<MultiTypeFactory, IExpandVisitor, AdaptiveViewHolder<MultiTypeFactory, IExpandVisitor>>() {
     override var typeFactory: MultiTypeFactory = MultiTypeFactory()
     //    override var useDiffUtilUpdate = false
     private val originalParentPosition: MutableList<Int> = MutableList(this.dataList.size) { 0 }
 
-    class ExpandDiffUtil(private var oldList: MutableList<IExpandVisitor>,
-                         private var newList: MutableList<IExpandVisitor>): DiffUtil.Callback() {
+    class ExpandDiffUtil(
+        private var oldList: MutableList<IExpandVisitor>,
+        private var newList: MutableList<IExpandVisitor>
+    ) : DiffUtil.Callback() {
         override fun getOldListSize(): Int = this.oldList.size
 
         override fun getNewListSize(): Int = newList.size
 
         override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
             this.oldList[oldItemPosition].hashCode() == this.newList[newItemPosition].hashCode()
+//            (this.oldList[oldItemPosition] as Person).name == (this.newList[newItemPosition] as Person).name
 
         override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean = true
     }

@@ -31,16 +31,14 @@ class MainActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         recyclerView.adapter = adapter
 
+        adapter.headerEntity = Person("Google @@@@@@@@")
+        adapter.footerEntity = Person("Google !!!!!!!!")
+
         btn_add.setOnClickListener {
-            adapter.appendList(listOf(Person("Google $a")) as MutableList<IExpandVisitor>)
-            a++
+            adapter.clearList(false, false)
         }
         btn_minus.setOnClickListener {
-            adapter.dropList(1, 1)
-        }
-        btn_minus.setOnLongClickListener {
-            adapter.clearList()
-            true
+            adapter.append(Person("BBBBBBBB ${a++}"))
         }
     }
 }
