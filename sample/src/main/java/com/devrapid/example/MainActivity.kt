@@ -38,7 +38,13 @@ class MainActivity : AppCompatActivity() {
             adapter.clearList(false, false)
         }
         btn_minus.setOnClickListener {
-            adapter.append(Person("BBBBBBBB ${a++}"))
+            adapter.replaceWholeList(mutableListOf(Person("BBBBBBBB ${a++}"),
+                                                   Person("BBBBBBBB ${a++}"),
+                                                   Person("BBBBBBBB ${a++}"),
+                                                   Person("BBBBBBBB ${a++}"),
+                                                   Person("BBBBBBBB ${a++}"),
+                                                   Person("BBBBBBBB ${a++}"),
+                                                   Person("BBBBBBBB ${a++}")))
         }
     }
 }
