@@ -27,7 +27,9 @@ class MainActivity : AppCompatActivity() {
                                                                   Person("Airbnb"),
                                                                   Person("Jieyi"))
 
-        val adapter = ExpandAdapter(itemList)
+        val adapter = ExpandAdapter().apply {
+            appendList(itemList)
+        }
         recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         recyclerView.adapter = adapter
 
@@ -35,16 +37,15 @@ class MainActivity : AppCompatActivity() {
         adapter.footerEntity = Person("Google !!!!!!!!")
 
         btn_add.setOnClickListener {
-            adapter.clearList(false, false)
         }
         btn_minus.setOnClickListener {
-            adapter.replaceWholeList(mutableListOf(Person("BBBBBBBB ${a++}"),
-                                                   Person("BBBBBBBB ${a++}"),
-                                                   Person("BBBBBBBB ${a++}"),
-                                                   Person("BBBBBBBB ${a++}"),
-                                                   Person("BBBBBBBB ${a++}"),
-                                                   Person("BBBBBBBB ${a++}"),
-                                                   Person("BBBBBBBB ${a++}")))
+            //            adapter.appendList(mutableListOf(Person("BBBBBBBB ${a++}"),
+//                                             Person("BBBBBBBB ${a++}"),
+//                                             Person("BBBBBBBB ${a++}"),
+//                                             Person("BBBBBBBB ${a++}"),
+//                                             Person("BBBBBBBB ${a++}"),
+//                                             Person("BBBBBBBB ${a++}"),
+//                                             Person("BBBBBBBB ${a++}")))
         }
     }
 }

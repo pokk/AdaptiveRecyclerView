@@ -26,7 +26,7 @@ class DeletableActivity : AppCompatActivity() {
                                                                   Person("Grape"),
                                                                   Person("Airbnb"),
                                                                   Person("Jieyi"))
-        val adapter = ExpandAdapter(itemList)
+        val adapter = ExpandAdapter().apply { appendList(itemList) }
 
         ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(UP or DOWN, LEFT or RIGHT) {
             override fun onMove(
@@ -37,7 +37,7 @@ class DeletableActivity : AppCompatActivity() {
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val position = viewHolder.layoutPosition
-                adapter.dropList(position, position)
+                adapter.dropRange(position..position)
             }
         }).attachToRecyclerView(recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)

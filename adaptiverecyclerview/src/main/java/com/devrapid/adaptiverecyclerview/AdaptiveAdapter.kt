@@ -16,6 +16,7 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
     RecyclerView.Adapter<VH>() {
     var headerEntity: M? = null
         set(value) {
+            if (field == value) return  // If the same, we don't do operations as the following below.
             value?.let {
                 if (field == null) {
                     dataList.add(0, it)
@@ -36,6 +37,7 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
         }
     var footerEntity: M? = null
         set(value) {
+            if (field == value) return  // If the same, we don't do operations as the following below.
             value?.let {
                 if (field == null) {
                     dataList.add(dataList.size, it)
@@ -56,6 +58,14 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
         }
     open var diffUtil: AdaptiveDiffUtil<VT, M> = MultiDiffUtil()
     open var useDiffUtilUpdate = true
+    val dataItemCount: Int
+        get() {
+            var size = dataList.size
+            if (headerEntity != null) size--
+            if (footerEntity != null) size--
+
+            return size
+        }
 
     protected abstract var typeFactory: VT
     protected abstract var dataList: MutableList<M>
@@ -92,7 +102,6 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
 
     fun listDescription() = dataList.joinToString("\n") { it.toString() }
 
-    // OPTIMIZE(jieyi): 2018/12/04 There's no checking bounding.
     open fun appendList(list: MutableList<M>) {
         var startIndex = dataList.size
         if (footerEntity != null)
@@ -111,11 +120,7 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
 
     @Deprecated("There's some bugs with index of header and footer")
     open fun add(position: Int, item: M) {
-        var size = dataList.size
-        if (headerEntity != null) size--
-        if (footerEntity != null) size--
-
-        if (size <= 0) throw IndexOutOfBoundsException()
+        if (dataItemCount <= 0) throw IndexOutOfBoundsException()
 
         val newList = dataList.toMutableList().apply {
             add(position + (if (headerEntity == null) 0 else 1) + (if (footerEntity == null) 0 else -1), item)
@@ -131,41 +136,42 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
         updateList { newList }
     }
 
-    @Deprecated("There's some bugs with index of header and footer")
-    open fun dropList(startIndex: Int, endIndex: Int) {
+    open fun dropRange(range: IntRange) {
+        var start = range.start
+
         when {
-            startIndex < 0 || endIndex >= dataList.size -> throw IndexOutOfBoundsException("The range is over than list.")
-            startIndex > endIndex -> throw IndexOutOfBoundsException("startIndex index must be less than endIndex index.")
+            start < 0 || range.last > dataItemCount - 1 ->
+                throw IndexOutOfBoundsException("The range is over than list. ListSize: ${dataItemCount - 1}, Range:$start..${range.last}")
+            start > range.last ->
+                throw IndexOutOfBoundsException("startIndex index must be less than endIndex index. Start: $start End: ${range.last}")
         }
         val newList = dataList.toMutableList()
 
-        repeat(endIndex - startIndex + 1) { newList.removeAt(startIndex) }
+        // Count the range.
+        if (headerEntity != null) start++
+        repeat(range.count()) { newList.removeAt(start) }
         updateList { newList }
     }
 
-    @Deprecated("There's some bugs with index of header and footer")
     open fun dropAt(index: Int) {
-        dropList(index, index)
+        dropRange(index..index)
     }
 
     open fun clearList(header: Boolean = true, footer: Boolean = true): Boolean {
-        var from = 0
-        var to = dataList.size - 1
-
-        if (dataList.size <= 0)
-            return false
-        if (!header && headerEntity != null)
-            from++
-        if (!footer && headerEntity != null)
-            to--
         if (header) headerEntity = null
         if (footer) footerEntity = null
 
-        dropList(from, to)
+        dropRange(0..(dataItemCount - 1))
 
         return true
     }
 
+    /**
+     * It will replace whole list to a new list. Replacing is not including
+     * the [headerEntity] and [footerEntity].
+     *
+     * @param newList
+     */
     open fun replaceWholeList(newList: MutableList<M>) {
         val withHeaderAndFooterList = newList.apply {
             headerEntity?.let { newList.add(0, it) }
@@ -174,7 +180,7 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
         updateList { withHeaderAndFooterList }
     }
 
-    private fun updateList(getNewListBlock: () -> MutableList<M>) {
+    open fun updateList(getNewListBlock: () -> MutableList<M>) {
         val newList = getNewListBlock()
         val res = DiffUtil.calculateDiff(diffUtil.apply {
             oldList = dataList
