@@ -118,20 +118,18 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
         updateList { newList }
     }
 
-    @Deprecated("There's some bugs with index of header and footer")
     open fun add(position: Int, item: M) {
         if (dataItemCount <= 0) throw IndexOutOfBoundsException()
 
         val newList = dataList.toMutableList().apply {
-            add(position + (if (headerEntity == null) 0 else 1) + (if (footerEntity == null) 0 else -1), item)
+            add(position + (if (headerEntity == null) 0 else 1), item)
         }
         updateList { newList }
     }
 
-    @Deprecated("There's some bugs with index of header and footer")
     open fun add(position: Int, list: MutableList<M>) {
         val newList = dataList.toMutableList().apply {
-            addAll(position + (if (headerEntity == null) 0 else 1) + (if (footerEntity == null) 0 else -1), list)
+            addAll(position + (if (headerEntity == null) 0 else 1), list)
         }
         updateList { newList }
     }

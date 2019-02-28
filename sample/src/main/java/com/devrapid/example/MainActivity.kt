@@ -37,6 +37,10 @@ class MainActivity : AppCompatActivity() {
         adapter.footerEntity = Person("Google !!!!!!!!")
 
         btn_add.setOnClickListener {
+            adapter.add(0, mutableListOf<IExpandVisitor>(Person("BBBBBBBB ${a++}"),
+                                                         Person("BBBBBBBB ${a++}"),
+                                                         Person("BBBBBBBB ${a++}"),
+                                                         Person("BBBBBBBB ${a++}")))
         }
         btn_minus.setOnClickListener {
             //            adapter.appendList(mutableListOf(Person("BBBBBBBB ${a++}"),
