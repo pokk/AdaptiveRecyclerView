@@ -171,9 +171,9 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
      * @param newList
      */
     open fun replaceWholeList(newList: MutableList<M>) {
-        val withHeaderAndFooterList = newList.apply {
-            headerEntity?.let { newList.add(0, it) }
-            footerEntity?.let { newList.add(newList.size, it) }
+        val withHeaderAndFooterList = newList.toMutableList().apply {
+            headerEntity?.let { add(0, it) }
+            footerEntity?.let { add(newList.size, it) }
         }
         updateList { withHeaderAndFooterList }
     }
