@@ -5,6 +5,20 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.devrapid.adaptiverecyclerview.MessageType.MESSAGE_ADD_LIST
+import com.devrapid.adaptiverecyclerview.MessageType.MESSAGE_ADD_SINGLE
+import com.devrapid.adaptiverecyclerview.MessageType.MESSAGE_APPEND_LIST
+import com.devrapid.adaptiverecyclerview.MessageType.MESSAGE_APPEND_SINGLE
+import com.devrapid.adaptiverecyclerview.MessageType.MESSAGE_DROP_ALL
+import com.devrapid.adaptiverecyclerview.MessageType.MESSAGE_DROP_RANGE
+import com.devrapid.adaptiverecyclerview.MessageType.MESSAGE_DROP_SINGLE
+import com.devrapid.adaptiverecyclerview.MessageType.MESSAGE_REPLACE_ALL
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import java.util.ArrayDeque
 
 /**
  * An adaptive [RecyclerView] which accepts multiple type layout.
@@ -14,6 +28,9 @@ import androidx.recyclerview.widget.RecyclerView
  */
 abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : RecyclerView.ViewHolder> :
     RecyclerView.Adapter<VH>() {
+    protected abstract var typeFactory: VT
+    protected abstract var dataList: MutableList<M>
+    //region Header and Footer
     var headerEntity: M? = null
         set(value) {
             if (field == value) return  // If the same, we don't do operations as the following below.
@@ -56,7 +73,8 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
             }
             field = value
         }
-    open var diffUtil: AdaptiveDiffUtil<VT, M> = MultiDiffUtil()
+    //endregion
+    open var diffUtil: AdaptiveDiffUtil<VT, M> = DefaultMultiDiffUtil()
     open var useDiffUtilUpdate = true
     val dataItemCount: Int
         get() {
@@ -66,23 +84,7 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
 
             return size
         }
-
-    protected abstract var typeFactory: VT
-    protected abstract var dataList: MutableList<M>
-
-    inner class MultiDiffUtil : AdaptiveDiffUtil<VT, M>() {
-        override var oldList = mutableListOf<M>()
-        override var newList = mutableListOf<M>()
-
-        override fun getOldListSize() = oldList.size
-
-        override fun getNewListSize() = newList.size
-
-        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) =
-            oldList[oldItemPosition].hashCode() == newList[newItemPosition].hashCode()
-
-        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) = true
-    }
+    private val queue = ArrayDeque<Message<M>>()
 
     //region Necessary override methods.
     override fun getItemCount() = dataList.size
@@ -102,39 +104,98 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
 
     fun listDescription() = dataList.joinToString("\n") { it.toString() }
 
-    open fun appendList(list: MutableList<M>) {
+    open fun append(list: MutableList<M>) {
+        queue.add(Message<M>().also {
+            it.type = MESSAGE_APPEND_LIST
+            it.newList = list
+        })
+        runUpdateTask()
+    }
+
+    open fun append(item: M) {
+        queue.add(Message<M>().also {
+            it.type = MESSAGE_APPEND_SINGLE
+            it.newItem = item
+        })
+        runUpdateTask()
+    }
+
+    open fun add(position: Int, list: MutableList<M>) {
+        queue.add(Message<M>().also {
+            it.type = MESSAGE_ADD_LIST
+            it.position = position
+            it.newList = list
+        })
+        runUpdateTask()
+    }
+
+    open fun add(position: Int, item: M) {
+        queue.add(Message<M>().also {
+            it.type = MESSAGE_ADD_SINGLE
+            it.newItem = item
+        })
+        runUpdateTask()
+    }
+
+    open fun dropRange(range: IntRange) {
+        queue.add(Message<M>().also {
+            it.type = MESSAGE_DROP_RANGE
+            it.range = range
+        })
+        runUpdateTask()
+    }
+
+    open fun dropAt(index: Int) {
+        queue.add(Message<M>().also {
+            it.type = MESSAGE_DROP_SINGLE
+            it.position = index
+        })
+        runUpdateTask()
+    }
+
+    open fun clearList(header: Boolean = true, footer: Boolean = true) {
+        queue.add(Message<M>().also {
+            it.type = MESSAGE_DROP_ALL
+            it.header = header
+            it.footer = footer
+        })
+        runUpdateTask()
+    }
+
+    open fun replaceWholeList(newList: MutableList<M>) {
+        queue.add(Message<M>().also {
+            it.type = MESSAGE_REPLACE_ALL
+            it.newList = newList
+        })
+        runUpdateTask()
+    }
+
+    //region Inner operations
+    protected open fun _append(list: MutableList<M>): MutableList<M> {
         var startIndex = dataList.size
         if (footerEntity != null)
             startIndex--
         // [toMutableList()] will create a new [ArrayList].
-        val newList = dataList.toMutableList().apply { addAll(startIndex, list) }
-        updateList { newList }
+        return dataList.toMutableList().apply { addAll(startIndex, list) }
     }
 
-    open fun append(item: M) {
-        val newList = dataList.toMutableList().apply {
-            if (footerEntity != null) add(dataList.size - 1, item) else add(item)
-        }
-        updateList { newList }
+    protected open fun _append(item: M) = dataList.toMutableList().apply {
+        if (footerEntity != null) add(dataList.size - 1, item) else add(item)
     }
 
-    open fun add(position: Int, item: M) {
+    protected open fun _add(position: Int, list: MutableList<M>) = dataList.toMutableList().apply {
+        addAll(position + (if (headerEntity == null) 0 else 1), list)
+    }
+
+    protected open fun _add(position: Int, item: M): MutableList<M> {
         if (dataItemCount <= 0) throw IndexOutOfBoundsException()
 
-        val newList = dataList.toMutableList().apply {
+        return dataList.toMutableList().apply {
             add(position + (if (headerEntity == null) 0 else 1), item)
         }
-        updateList { newList }
     }
 
-    open fun add(position: Int, list: MutableList<M>) {
-        val newList = dataList.toMutableList().apply {
-            addAll(position + (if (headerEntity == null) 0 else 1), list)
-        }
-        updateList { newList }
-    }
-
-    open fun dropRange(range: IntRange) {
+    protected open fun _dropRange(range: IntRange): MutableList<M> {
         var start = range.start
 
         when {
@@ -148,20 +209,22 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
         // Count the range.
         if (headerEntity != null) start++
         repeat(range.count()) { newList.removeAt(start) }
-        updateList { newList }
+
+        return newList
     }
 
-    open fun dropAt(index: Int) {
-        dropRange(index..index)
-    }
+    protected open fun _dropAt(index: Int) = _dropRange(index..index)
 
-    open fun clearList(header: Boolean = true, footer: Boolean = true): Boolean {
-        if (header) headerEntity = null
-        if (footer) footerEntity = null
+    protected open fun _clearList(header: Boolean = true, footer: Boolean = true): MutableList<M> = runBlocking {
+        withContext(Dispatchers.Main) {
+            if (header) headerEntity = null
+            if (footer) footerEntity = null
+        }
 
-        dropRange(0..(dataItemCount - 1))
-
-        return true
+        mutableListOf<M>().apply {
+            headerEntity?.let(::add)
+            footerEntity?.let(::add)
+        }
     }
 
     /**
@@ -170,25 +233,47 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
      *
      * @param newList
      */
-    open fun replaceWholeList(newList: MutableList<M>) {
-        val withHeaderAndFooterList = newList.toMutableList().apply {
-            headerEntity?.let { add(0, it) }
-            footerEntity?.let { add(newList.size, it) }
+    protected open fun _replaceWholeList(newList: MutableList<M>) = newList.toMutableList().apply {
+        headerEntity?.let { add(0, it) }
+        footerEntity?.let { add(newList.size + (if (headerEntity == null) 0 else 1), it) }
+    }
+    //endregion
+
+    //region Real doing update task
+    private fun runUpdateTask() {
+        if (queue.size > 1) return
+        update(queue.peek())
+    }
+
+    private fun update(message: Message<M>) {
+        GlobalScope.launch {
+            val list = extractUpdateList(message)
+            val res = DiffUtil.calculateDiff(diffUtil.apply {
+                oldList = dataList
+                newList = list
+            })
+
+            withContext(Dispatchers.Main) {
+                dataList = list
+                res.dispatchUpdatesTo(this@AdaptiveAdapter)
+                queue.remove()
+                // Check the queue is still having message.
+                if (queue.size > 0)
+                    update(queue.peek())
+            }
         }
-        updateList { withHeaderAndFooterList }
     }
 
-    open fun updateList(getNewListBlock: () -> MutableList<M>) {
-        val newList = getNewListBlock()
-        val res = DiffUtil.calculateDiff(diffUtil.apply {
-            oldList = dataList
-            this.newList = newList
-        })
-
-        dataList = newList
-        if (useDiffUtilUpdate)
-            res.dispatchUpdatesTo(this)
-        else
-            notifyDataSetChanged()
+    private fun extractUpdateList(message: Message<M>) = when (message.type) {
+        MESSAGE_APPEND_LIST -> _append(message.newList)
+        MESSAGE_APPEND_SINGLE -> _append(requireNotNull(message.newItem))
+        MESSAGE_ADD_LIST -> _add(message.position, message.newList)
+        MESSAGE_ADD_SINGLE -> _add(message.position, requireNotNull(message.newItem))
+        MESSAGE_DROP_RANGE -> _dropRange(message.range)
+        MESSAGE_DROP_SINGLE -> _dropAt(message.position)
+        MESSAGE_DROP_ALL -> _clearList(message.header, message.footer)
+        MESSAGE_REPLACE_ALL -> _replaceWholeList(message.newList)
+        else -> mutableListOf()
     }
+    //endregion
 }

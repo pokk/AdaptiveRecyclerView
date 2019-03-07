@@ -27,29 +27,23 @@ class MainActivity : AppCompatActivity() {
                                                                   Person("Airbnb"),
                                                                   Person("Jieyi"))
 
-        val adapter = ExpandAdapter().apply {
-            appendList(itemList)
-        }
         recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        val adapter = ExpandAdapter().apply {
+            append(itemList)
+        }
         recyclerView.adapter = adapter
 
         adapter.headerEntity = Person("Google @@@@@@@@")
         adapter.footerEntity = Person("Google !!!!!!!!")
 
         btn_add.setOnClickListener {
-            adapter.add(0, mutableListOf<IExpandVisitor>(Person("BBBBBBBB ${a++}"),
+            adapter.append(mutableListOf<IExpandVisitor>(Person("BBBBBBBB ${a++}"),
                                                          Person("BBBBBBBB ${a++}"),
                                                          Person("BBBBBBBB ${a++}"),
                                                          Person("BBBBBBBB ${a++}")))
         }
         btn_minus.setOnClickListener {
-            //            adapter.appendList(mutableListOf(Person("BBBBBBBB ${a++}"),
-//                                             Person("BBBBBBBB ${a++}"),
-//                                             Person("BBBBBBBB ${a++}"),
-//                                             Person("BBBBBBBB ${a++}"),
-//                                             Person("BBBBBBBB ${a++}"),
-//                                             Person("BBBBBBBB ${a++}"),
-//                                             Person("BBBBBBBB ${a++}")))
+            adapter.clearList()
         }
     }
 }

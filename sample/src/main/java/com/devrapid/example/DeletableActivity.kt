@@ -26,7 +26,7 @@ class DeletableActivity : AppCompatActivity() {
                                                                   Person("Grape"),
                                                                   Person("Airbnb"),
                                                                   Person("Jieyi"))
-        val adapter = ExpandAdapter().apply { appendList(itemList) }
+        val adapter = ExpandAdapter().apply { add(0, itemList) }
 
         ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(UP or DOWN, LEFT or RIGHT) {
             override fun onMove(
