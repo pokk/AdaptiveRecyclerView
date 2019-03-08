@@ -31,6 +31,7 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
     protected abstract var typeFactory: VT
     protected abstract var dataList: MutableList<M>
     //region Header and Footer
+    // TODO(jieyi): 2019/03/08 Added the msg into msg queue too, otherwise, cause inconsistency.
     var headerEntity: M? = null
         set(value) {
             if (field == value) return  // If the same, we don't do operations as the following below.
