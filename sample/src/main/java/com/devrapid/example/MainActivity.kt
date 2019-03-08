@@ -31,6 +31,9 @@ class MainActivity : AppCompatActivity() {
         val adapter = ExpandAdapter().apply {
             append(itemList)
         }
+        adapter.setOnFinishListener {
+            //            runBlocking { delay(1000) }
+        }
         recyclerView.adapter = adapter
 
         adapter.headerEntity = Person("Google @@@@@@@@")

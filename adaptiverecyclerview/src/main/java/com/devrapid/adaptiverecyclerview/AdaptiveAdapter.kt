@@ -85,6 +85,8 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
             return size
         }
     private val queue = ArrayDeque<Message<M>>()
+    // Don't forget unbinding this listener.
+    private var onFinishListener: DiffProcessCallback? = null
 
     //region Necessary override methods.
     override fun getItemCount() = dataList.size
@@ -168,6 +170,19 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
             it.newList = newList
         })
         runUpdateTask()
+    }
+
+    fun setOnFinishListener(callback: (() -> Unit)?) {
+        if (callback == null) {
+            onFinishListener = null
+            return
+        }
+
+        onFinishListener = object : DiffProcessCallback {
+            override fun onProcessFinish() {
+                callback()
+            }
+        }
     }
 
     //region Inner operations
@@ -260,6 +275,7 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
                 // Check the queue is still having message.
                 if (queue.size > 0)
                     update(queue.peek())
+                GlobalScope.launch(Dispatchers.Main) { onFinishListener?.onProcessFinish() }
             }
         }
     }
