@@ -135,6 +135,7 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
     open fun add(position: Int, item: M) {
         queue.add(Message<M>().also {
             it.type = MESSAGE_ADD_SINGLE
+            it.position = position
             it.newItem = item
         })
         runUpdateTask()
