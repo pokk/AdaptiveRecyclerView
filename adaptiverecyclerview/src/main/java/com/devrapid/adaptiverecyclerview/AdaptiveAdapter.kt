@@ -286,12 +286,6 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
     }
 
     private fun update(message: Message<M>) {
-//         Special case for header and footer.
-//        if (message.type == MESSAGE_ADD_HEADER || message.type == MESSAGE_ADD_FOOTER) {
-//            extractUpdateList(message)
-//            return
-//        }
-        // Otherwise
         GlobalScope.launch {
             val list = extractUpdateList(message)
             val res = if (list != null)
