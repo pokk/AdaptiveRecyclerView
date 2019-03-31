@@ -5,6 +5,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.devrapid.adaptiverecyclerview.MessageType.MESSAGE_ADD_FOOTER
+import com.devrapid.adaptiverecyclerview.MessageType.MESSAGE_ADD_HEADER
 import com.devrapid.adaptiverecyclerview.MessageType.MESSAGE_ADD_LIST
 import com.devrapid.adaptiverecyclerview.MessageType.MESSAGE_ADD_SINGLE
 import com.devrapid.adaptiverecyclerview.MessageType.MESSAGE_APPEND_LIST
@@ -31,49 +33,30 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
     protected abstract var typeFactory: VT
     protected abstract var dataList: MutableList<M>
     //region Header and Footer
-    // TODO(jieyi): 2019/03/08 Added the msg into msg queue too, otherwise, cause inconsistency.
     var headerEntity: M? = null
         set(value) {
             if (field == value) return  // If the same, we don't do operations as the following below.
-            value?.let {
-                if (field == null) {
-                    dataList.add(0, it)
-                    notifyItemInserted(0)
-                }
-                else {
-                    dataList.removeAt(0)
-                    dataList.add(0, it)
-                    notifyItemChanged(0)
-                }
-            } ?: run {
-                if (field != null) {
-                    dataList.removeAt(0)
-                    notifyItemRemoved(0)
-                }
-            }
+            queue.add(Message<M>().also {
+                it.type = MESSAGE_ADD_HEADER
+                it.newItem = value
+                it.oldItem = field
+            })
+            runUpdateTask()
             field = value
         }
+
     var footerEntity: M? = null
         set(value) {
             if (field == value) return  // If the same, we don't do operations as the following below.
-            value?.let {
-                if (field == null) {
-                    dataList.add(dataList.size, it)
-                    notifyItemInserted(dataList.size)
-                }
-                else {
-                    dataList.removeAt(dataList.size - 1)
-                    dataList.add(dataList.size, it)
-                    notifyItemChanged(dataList.size - 1)
-                }
-            } ?: run {
-                if (field != null) {
-                    dataList.removeAt(dataList.size - 1)
-                    notifyItemRemoved(dataList.size)
-                }
-            }
+            queue.add(Message<M>().also {
+                it.type = MESSAGE_ADD_FOOTER
+                it.newItem = value
+                it.oldItem = field
+            })
+            runUpdateTask()
             field = value
         }
+
     //endregion
     open var diffUtil: AdaptiveDiffUtil<VT, M> = DefaultMultiDiffUtil()
     open var useDiffUtilUpdate = true
@@ -254,6 +237,46 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
         headerEntity?.let { add(0, it) }
         footerEntity?.let { add(newList.size + (if (headerEntity == null) 0 else 1), it) }
     }
+
+    private fun _setHeader(value: M?, headerEntity: M?): MutableList<M>? {
+        value?.let {
+            if (headerEntity == null) {
+                dataList.add(0, it)
+                notifyItemInserted(0)
+            }
+            else {
+                dataList.removeAt(0)
+                dataList.add(0, it)
+                GlobalScope.launch(Dispatchers.Main) { notifyItemChanged(0) }
+            }
+        } ?: run {
+            if (headerEntity != null && dataList.size > 0) {
+                dataList.removeAt(0)
+                GlobalScope.launch(Dispatchers.Main) { notifyItemRemoved(0) }
+            }
+        }
+        return null
+    }
+
+    private fun _setFooter(value: M?, footerEntity: M?): MutableList<M>? {
+        value?.let {
+            if (footerEntity == null) {
+                dataList.add(dataList.size, it)
+                GlobalScope.launch(Dispatchers.Main) { notifyItemInserted(dataList.size) }
+            }
+            else {
+                dataList.removeAt(dataList.size - 1)
+                dataList.add(dataList.size, it)
+                GlobalScope.launch(Dispatchers.Main) { notifyItemChanged(dataList.size - 1) }
+            }
+        } ?: run {
+            if (footerEntity != null && dataList.size - 1 > 0) {
+                dataList.removeAt(dataList.size - 1)
+                GlobalScope.launch(Dispatchers.Main) { notifyItemRemoved(dataList.size) }
+            }
+        }
+        return null
+    }
     //endregion
 
     //region Real doing update task
@@ -263,16 +286,26 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
     }
 
     private fun update(message: Message<M>) {
+//         Special case for header and footer.
+//        if (message.type == MESSAGE_ADD_HEADER || message.type == MESSAGE_ADD_FOOTER) {
+//            extractUpdateList(message)
+//            return
+//        }
+        // Otherwise
         GlobalScope.launch {
             val list = extractUpdateList(message)
-            val res = DiffUtil.calculateDiff(diffUtil.apply {
-                oldList = dataList
-                newList = list
-            })
+            val res = if (list != null)
+                DiffUtil.calculateDiff(diffUtil.apply {
+                    oldList = dataList
+                    newList = list
+                })
+            else null
 
             withContext(Dispatchers.Main) {
-                dataList = list
-                res.dispatchUpdatesTo(this@AdaptiveAdapter)
+                if (list != null) {
+                    dataList = list
+                    res?.dispatchUpdatesTo(this@AdaptiveAdapter)
+                }
                 queue.remove()
                 // Check the queue is still having message.
                 if (queue.size > 0)
@@ -282,7 +315,7 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
         }
     }
 
-    private fun extractUpdateList(message: Message<M>) = when (message.type) {
+    private fun extractUpdateList(message: Message<M>): MutableList<M>? = when (message.type) {
         MESSAGE_APPEND_LIST -> _append(message.newList)
         MESSAGE_APPEND_SINGLE -> _append(requireNotNull(message.newItem))
         MESSAGE_ADD_LIST -> _add(message.position, message.newList)
@@ -291,7 +324,9 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
         MESSAGE_DROP_SINGLE -> _dropAt(message.position)
         MESSAGE_DROP_ALL -> _clearList(message.header, message.footer)
         MESSAGE_REPLACE_ALL -> _replaceWholeList(message.newList)
-        else -> mutableListOf()
+        MESSAGE_ADD_HEADER -> _setHeader(message.newItem, message.oldItem)
+        MESSAGE_ADD_FOOTER -> _setFooter(message.newItem, message.oldItem)
+        else -> null
     }
     //endregion
 }

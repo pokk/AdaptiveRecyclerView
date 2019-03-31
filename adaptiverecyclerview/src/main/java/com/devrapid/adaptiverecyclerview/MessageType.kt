@@ -9,4 +9,6 @@ object MessageType {
     internal const val MESSAGE_DROP_SINGLE = 6
     internal const val MESSAGE_DROP_ALL = 7
     internal const val MESSAGE_REPLACE_ALL = 8
+    internal const val MESSAGE_ADD_HEADER = 9
+    internal const val MESSAGE_ADD_FOOTER = 10
 }

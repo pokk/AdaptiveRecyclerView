@@ -6,6 +6,7 @@ internal class Message<M> {
     var range = -1..-1
     var newList = mutableListOf<M>()
     var newItem: M? = null
+    var oldItem: M? = null
     var header = true
     var footer = true
 }

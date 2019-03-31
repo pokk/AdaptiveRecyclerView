@@ -36,14 +36,15 @@ class MainActivity : AppCompatActivity() {
         }
         recyclerView.adapter = adapter
 
-        adapter.headerEntity = Person("Google @@@@@@@@")
-        adapter.footerEntity = Person("Google !!!!!!!!")
+//        adapter.headerEntity = Person("Google @@@@@@@@")
+//        adapter.footerEntity = Person("Google !!!!!!!!")
 
         btn_add.setOnClickListener {
             adapter.append(mutableListOf<IExpandVisitor>(Person("BBBBBBBB ${a++}"),
                                                          Person("BBBBBBBB ${a++}"),
                                                          Person("BBBBBBBB ${a++}"),
                                                          Person("BBBBBBBB ${a++}")))
+            adapter.footerEntity = Person("Google @@@@@@@@")
         }
         btn_minus.setOnClickListener {
             adapter.clearList()
