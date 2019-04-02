@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
                                                          Person("BBBBBBBB ${a++}"),
                                                          Person("BBBBBBBB ${a++}"),
                                                          Person("BBBBBBBB ${a++}")))
-            adapter.footerEntity = Person("Google @@@@@@@@")
+            adapter.setHeader(Person("Google @@@@@@@@"))
         }
         btn_minus.setOnClickListener {
             adapter.clearList()

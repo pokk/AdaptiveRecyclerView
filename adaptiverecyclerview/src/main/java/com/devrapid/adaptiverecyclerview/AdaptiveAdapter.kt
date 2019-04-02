@@ -29,37 +29,13 @@ import java.util.ArrayDeque
  * @since   9/6/17
  */
 abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : RecyclerView.ViewHolder> :
-    RecyclerView.Adapter<VH>() {
+    RecyclerView.Adapter<VH>(), AdapterCollection<VT, M> {
+    //region Overridable variables.
     protected abstract var typeFactory: VT
     protected abstract var dataList: MutableList<M>
-    //region Header and Footer
-    var headerEntity: M? = null
-        set(value) {
-            if (field == value) return  // If the same, we don't do operations as the following below.
-            queue.add(Message<M>().also {
-                it.type = MESSAGE_ADD_HEADER
-                it.newItem = value
-                it.oldItem = field
-            })
-            runUpdateTask()
-            field = value
-        }
-
-    var footerEntity: M? = null
-        set(value) {
-            if (field == value) return  // If the same, we don't do operations as the following below.
-            queue.add(Message<M>().also {
-                it.type = MESSAGE_ADD_FOOTER
-                it.newItem = value
-                it.oldItem = field
-            })
-            runUpdateTask()
-            field = value
-        }
-
-    //endregion
     open var diffUtil: AdaptiveDiffUtil<VT, M> = DefaultMultiDiffUtil()
     open var useDiffUtilUpdate = true
+    /** The real data list count. */
     val dataItemCount: Int
         get() {
             var size = dataList.size
@@ -68,9 +44,17 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
 
             return size
         }
+    //endregion
+    //region Private variables.
+    /** Header item. */
+    private var headerEntity: M? = null
+    /** Footer item. */
+    private var footerEntity: M? = null
+    /** The queue for adding all tasks by inserting, removing, modifying the list. */
     private val queue = ArrayDeque<Message<M>>()
     // Don't forget unbinding this listener.
     private var onFinishListener: DiffProcessCallback? = null
+    //endregion
 
     //region Necessary override methods.
     override fun getItemCount() = dataList.size
@@ -88,9 +72,22 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
     }
     //endregion
 
-    fun listDescription() = dataList.joinToString("\n") { it.toString() }
+    /**
+     * Show the all items' detail information because the adapter doesn't allow others to get
+     * the list data. Just allow showing the list content.
+     *
+     * @return a string with the detail of whole list items.
+     */
+    override fun listDescription() = dataList.joinToString("\n") { it.toString() }
 
-    open fun append(list: MutableList<M>) {
+    /**
+     * Append a list of items to the last of the adapter's data list's by using queue message
+     * for avoiding the race condition to break the correct order.
+     * If there're the same entities, [DiffUtil] will filter it.
+     *
+     * @param list a new list the user wants to append.
+     */
+    override fun append(list: MutableList<M>) {
         queue.add(Message<M>().also {
             it.type = MESSAGE_APPEND_LIST
             it.newList = list
@@ -98,7 +95,14 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
         runUpdateTask()
     }
 
-    open fun append(item: M) {
+    /**
+     * Add a item to to the last of the adapter's data list by using queue message for avoiding
+     * the race condition to break the correct order.
+     * If there's the same entities, [DiffUtil] will filter it.
+     *
+     * @param item a new item entity the user wants to append.
+     */
+    override fun append(item: M) {
         queue.add(Message<M>().also {
             it.type = MESSAGE_APPEND_SINGLE
             it.newItem = item
@@ -106,7 +110,15 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
         runUpdateTask()
     }
 
-    open fun add(position: Int, list: MutableList<M>) {
+    /**
+     * Add a list to the assigned position of the adapter's data list by using queue message for
+     * avoiding the race condition to break the correct order.
+     * If there's the same entities, [DiffUtil] will filter it.
+     *
+     * @param position between 0 and last of item size.
+     * @param list a new list the user wants to insert.
+     */
+    override fun add(position: Int, list: MutableList<M>) {
         queue.add(Message<M>().also {
             it.type = MESSAGE_ADD_LIST
             it.position = position
@@ -115,7 +127,15 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
         runUpdateTask()
     }
 
-    open fun add(position: Int, item: M) {
+    /**
+     * Add a item to the assigned position of the adapter's data list by using queue message for
+     * avoiding the race condition to break the correct order.
+     * If there's the same entities, [DiffUtil] will filter it.
+     *
+     * @param position between 0 and last of item size.
+     * @param item a new item entity the user wants to insert.
+     */
+    override fun add(position: Int, item: M) {
         queue.add(Message<M>().also {
             it.type = MESSAGE_ADD_SINGLE
             it.position = position
@@ -124,7 +144,12 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
         runUpdateTask()
     }
 
-    open fun dropRange(range: IntRange) {
+    /**
+     * Remove a list by range from adapter list.
+     *
+     * @param range a range of removing a list from adapter.
+     */
+    override fun dropRange(range: IntRange) {
         queue.add(Message<M>().also {
             it.type = MESSAGE_DROP_RANGE
             it.range = range
@@ -132,7 +157,12 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
         runUpdateTask()
     }
 
-    open fun dropAt(index: Int) {
+    /**
+     * Remove a item entity from assigned position.
+     *
+     * @param index
+     */
+    override fun dropAt(index: Int) {
         queue.add(Message<M>().also {
             it.type = MESSAGE_DROP_SINGLE
             it.position = index
@@ -140,7 +170,13 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
         runUpdateTask()
     }
 
-    open fun clearList(header: Boolean = true, footer: Boolean = true) {
+    /**
+     * Remove whole items from the adapter list.
+     *
+     * @param header if true, [headerEntity] will be removed, otherwise, keeps it.
+     * @param footer if true, [footerEntity] will be removed, otherwise, keeps it.
+     */
+    override fun clearList(header: Boolean, footer: Boolean) {
         queue.add(Message<M>().also {
             it.type = MESSAGE_DROP_ALL
             it.header = header
@@ -149,10 +185,35 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
         runUpdateTask()
     }
 
-    open fun replaceWholeList(newList: MutableList<M>) {
+    /**
+     * Remove whole items then add the [newList] into the adapter list.
+     *
+     * @param newList MutableList<M>
+     */
+    override fun replaceWholeList(newList: MutableList<M>) {
         queue.add(Message<M>().also {
             it.type = MESSAGE_REPLACE_ALL
             it.newList = newList
+        })
+        runUpdateTask()
+    }
+
+    override fun setHeader(header: M) {
+        if (header == headerEntity) return
+        queue.add(Message<M>().also {
+            it.type = MESSAGE_ADD_HEADER
+            it.newItem = header
+            it.oldItem = headerEntity
+        })
+        runUpdateTask()
+    }
+
+    override fun setFooter(footer: M) {
+        if (footer == footerEntity) return
+        queue.add(Message<M>().also {
+            it.type = MESSAGE_ADD_FOOTER
+            it.newItem = footer
+            it.oldItem = footerEntity
         })
         runUpdateTask()
     }
@@ -255,6 +316,7 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
                 GlobalScope.launch(Dispatchers.Main) { notifyItemRemoved(0) }
             }
         }
+        this.headerEntity = value
         return null
     }
 
@@ -275,6 +337,7 @@ abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : Re
                 GlobalScope.launch(Dispatchers.Main) { notifyItemRemoved(dataList.size) }
             }
         }
+        this.footerEntity = value
         return null
     }
     //endregion
