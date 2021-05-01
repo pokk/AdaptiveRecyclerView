@@ -1,14 +1,14 @@
 package com.devrapid.adaptiverecyclerview
 
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
 
 /**
  * An adaptive [RecyclerView] which accepts multiple type layout.
  *
- * @author  jieyi
- * @since   9/6/17
+ * @author jieyi
+ * @since 9/6/17
  */
 abstract class AdaptiveAdapter<VT : ViewTypeFactory, M : IVisitable<VT>, VH : RecyclerView.ViewHolder> :
     RecyclerView.Adapter<VH>() {
