@@ -2,6 +2,22 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'com.vanniktech.maven.publish'
 
+// Get a variable from local.properties.
+ext.getProps = { propName ->
+    def propsFile = rootProject.file('local.properties')
+
+    if (!propsFile.exists()) return "\"No_Exist\""
+
+    def props = new Properties()
+    props.load(new FileInputStream(propsFile))
+
+    return null != props[propName] ? props[propName] : "\"There_is_no_parameter\""
+}
+
+ext["signing.keyId"] = getProps("signing.keyId")
+ext["signing.password"] = getProps("signing.password")
+ext["signing.secretKeyRingFile"] = getProps("signing.secretKeyRingFile")
+
 android {
     compileSdkVersion 30
     defaultConfig {
